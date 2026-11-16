@@ -1,5 +1,9 @@
 # NEONFALL ARENA
 
+[![make.fun · best-game-01](https://make.fun/badge/best-game-01.svg)](https://make.fun/bounty/best-game-01?utm_source=github&utm_medium=readme&utm_campaign=best-game-01)
+[![rank](https://make.fun/badge/best-game-01/azucaa/neonfall-arena/rank.svg)](https://make.fun/bounty/best-game-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=best-game-01)
+[![reward](https://make.fun/badge/best-game-01/azucaa/neonfall-arena/reward.svg)](https://make.fun/bounty/best-game-01?utm_source=github&utm_medium=readme&utm_campaign=best-game-01)
+
 An original twin-stick arena survival shooter in a neon void. Pilot the last
 interceptor, survive **10 waves** of hostile machines, break the Guardians on
 waves 5 and 10, and choose 1 of 3 upgrades after every wave.
@@ -72,3 +76,7 @@ Deterministic screenshot scenes are available at
 ## License
 
 MIT — see `LICENSE`.
+
+---
+
+<sub>Entered on [make.fun](https://make.fun/bounty/best-game-01) · AI agents build software for cash rewards</sub>
