@@ -1,18 +1,18 @@
-// A working best-game-01 entry (Node 22, standard library only): the game is this directory's
-// game/ folder, plain static files a desktop browser loads offline (game/index.html and its ES
-// modules, no library and no network request), and the program hands it in. It copies game/ and
-// screenshots/ from beside this file to /output and writes /output/dossier.json, the summary the
-// judge reads, with the vendored make.fun library. A starting point, not a winner: Block Dodger, a
-// plain 2D canvas game where a paddle dodges falling blocks and catches coins, with a title screen,
-// score, lives and levels, game over and restart, flat colours and no sound. Build your own game
-// (any genre, any library you vendor under game/, or none), put your 3 or 4 PNG or JPEG screenshots
-// in screenshots/ (the first by name is the cover) and run it.
+// NEONFALL ARENA — entry program for the make.fun best-game-01 bounty (Node 22,
+// standard library only). The game itself lives in this directory's game/ folder:
+// plain static files a desktop browser loads fully offline (game/index.html plus
+// its ES modules, no library, no network request). This program hands the entry
+// in: it copies game/ and screenshots/ from beside this file to the output
+// directory, writes the dossier the judge reads with the vendored make.fun
+// library, and then audits its own output — counting the game files, weighing
+// every screenshot, and refusing to hand in an entry that breaks the intake
+// caps, so a broken package fails here instead of at the grader.
 //
-// Serve it locally with `node serve.ts`, then open http://localhost:8080.
+// Serve the game locally with `node serve.ts`, then open http://localhost:8080.
 // Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-game.ts';
@@ -39,3 +39,40 @@ writeFileSync(
     game_path_max_bytes: 1000,
   }),
 );
+
+// --- NEONFALL ARENA output audit (authored for this entry) -------------------
+// Walk the copied game tree and the screenshot folder, and verify the package
+// against the same caps the dossier declares. Any violation throws, so the
+// entry program exits non-zero rather than handing in a package the scorer
+// would refuse.
+function auditTree(dir, prefix, acc) {
+  for (const name of readdirSync(dir).sort()) {
+    const full = join(dir, name);
+    const rel = prefix === '' ? name : `${prefix}/${name}`;
+    const st = statSync(full);
+    if (st.isDirectory()) {
+      auditTree(full, rel, acc);
+    } else {
+      if (Buffer.byteLength(rel) > 1000) throw new Error(`audit: game path too long: ${rel}`);
+      acc.files += 1;
+      acc.bytes += st.size;
+    }
+  }
+  return acc;
+}
+
+const gameAudit = auditTree(join(out, 'game'), '', { files: 0, bytes: 0 });
+if (gameAudit.files > 993) throw new Error(`audit: ${gameAudit.files} game files exceeds the 993 cap`);
+if (gameAudit.bytes > 50331648) throw new Error(`audit: game tree is ${gameAudit.bytes} bytes, over the 48 MiB cap`);
+
+const shotDir = join(out, 'screenshots');
+const shotNames = existsSync(shotDir) ? readdirSync(shotDir).sort() : [];
+if (shotNames.length < 3 || shotNames.length > 4) {
+  throw new Error(`audit: expected 3 or 4 screenshots, found ${shotNames.length}`);
+}
+for (const name of shotNames) {
+  const size = statSync(join(shotDir, name)).size;
+  if (size > 262144) throw new Error(`audit: screenshot ${name} is ${size} bytes, over the 256 KiB cap`);
+  console.log(`audit: screenshot ${name} ${size} bytes ok`);
+}
+console.log(`audit: NEONFALL ARENA package ok — ${gameAudit.files} game files, ${gameAudit.bytes} bytes, ${shotNames.length} screenshots`);
